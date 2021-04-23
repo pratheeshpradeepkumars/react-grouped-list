@@ -4,7 +4,8 @@ import PageList from "./PageList";
 export default class extends Component {
   state = {
     uploadedFiles: [],
-    searchValue: ""
+    searchValue: "",
+    selectedList: []
   };
 
   componentDidMount() {
@@ -33,6 +34,43 @@ export default class extends Component {
     });
     return newData;
   }
+
+  // handle list select
+  handleSelect = (e, { pageId, id }) => {
+    let checked = e.target.checked,;
+    let newList = [...this.state.uploadedFiles].map(files => {
+      if(files.id === id) {
+         files.pages.map(page => {
+          if(page.pageId === pageId) {
+            page.checked = checked
+          }
+          return page;
+        })
+        return files
+      }else {
+        return files;
+      }
+    });
+    this.setState({ uploadedFiles: newList})
+  };
+
+  // On click Inport
+  handleImport = () => {
+    let { uploadedFiles } = this.state;
+    let filteredUploadFiles = [];
+    uploadedFiles.forEach(files => {
+      let newFiles = {...files};
+      let filteredChecked = files.pages.filter(page => page.checked);
+      newFiles.pages = [];
+      if(filteredChecked.length > 0) {
+        newFiles.pages = [...filteredChecked];
+        filteredUploadFiles.push(newFiles);
+      }
+    });
+
+    console.log("Import values : ", JSON.stringify(filteredUploadFiles, null, 2));
+  }
+
   render() {
     const { searchValue } = this.state;
     const filteredUploadedFiles = this.filterBySearchValue(searchValue);
@@ -51,11 +89,20 @@ export default class extends Component {
             <div className="header" key={list.id}>
               <div className="file-name">{list.fileName}</div>
               {list.pages.map(page => {
-                return <PageList key={page.pageId} {...page} />;
+                return (
+                  <PageList
+                    key={page.pageId}
+                    {...page}
+                    onSelect={(e, { pageId }) => {
+                      this.handleSelect(e, { pageId, id: list.id });
+                    }}
+                  />
+                );
               })}
             </div>
           ))}
         </div>
+        <button onClick={this.handleImport}>Import</button>
       </div>
     );
   }
