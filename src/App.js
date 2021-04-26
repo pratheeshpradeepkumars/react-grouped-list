@@ -56,9 +56,21 @@ export default class extends Component {
     this.setState({ uploadedFiles: newList})
   };
 
-  // On Edit onClick
-  handleEdit = (pageId) => {
-   // this.setState({ id })
+  // On Edit save
+  handleEdit = ({fileId, pageId, pageName}) => {
+    let { uploadedFiles }  = this.state;
+    let processedFiles = uploadedFiles.map(files => {
+      if(files.id === fileId) {
+        files.pages.map(page => {
+          if(page.pageId === pageId) {
+            page.name = pageName
+          }
+          return page
+        })
+      }
+      return files;
+    });
+    this.setState( { uploadedFiles: processedFiles });
   }
 
   // reset Edit

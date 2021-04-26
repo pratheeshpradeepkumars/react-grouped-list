@@ -7,7 +7,8 @@ const PageList = ({
   versionActiveData,
   checked = false,
   onSelect,
-  validatePageName
+  validatePageName,
+  handleEdit
 }) => {
   let options = [];
   for (let version in versionActiveData) {
@@ -32,6 +33,8 @@ const PageList = ({
     const isValid = validatePageName({ pageId, pageName: value, checked });
     if (!isValid) {
       setIsValidText(false);
+    } else {
+      setIsValidText(true);
     }
   };
 
@@ -41,6 +44,9 @@ const PageList = ({
       if (isValid) {
         setEditItem(null);
         setIsValidText(true);
+        if (editText !== name) {
+          handleEdit({ fileId, pageId, pageName: editText });
+        }
       } else {
         setIsValidText(false);
       }
