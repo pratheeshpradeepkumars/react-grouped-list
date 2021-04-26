@@ -64,9 +64,10 @@ const PageList = ({
   };
 
   return (
-    <div className="pages-list" style={{ display: "flex" }}>
+    <div className="pages-list">
       <input
         type="checkbox"
+        className="selection-box"
         id={checkboxId}
         checked={checked}
         onChange={e => onSelect(e, { pageId, pageName: editText })}
@@ -76,7 +77,7 @@ const PageList = ({
       ) : (
         <input
           placeholder={isValidText}
-          className={`${isValidText ? "" : "invalid-text"}`}
+          className={`edit-text ${isValidText ? "" : "invalid-text"}`}
           type="text"
           value={editText}
           onChange={handleEditChange}
@@ -86,7 +87,9 @@ const PageList = ({
           onBlur={e => handleOnBlur(e)}
         />
       )}
-      <button onClick={() => onEdit(pageId)}>Edit</button>
+      {editItem !== pageId && (
+        <button onClick={() => onEdit(pageId)}>Edit</button>
+      )}
       <div />
     </div>
   );

@@ -145,6 +145,7 @@ export default class extends Component {
           {filteredUploadedFiles.map(list => (
             <div className="header" key={list.id}>
               <div className="file-name">{list.fileName}</div>
+              <div className="pages-list-container">
               {list.pages.map(page => {
                 return (
                   <PageList
@@ -158,7 +159,7 @@ export default class extends Component {
                     validatePageName={this.validatePageName}
                   />
                 );
-              })}
+              })}</div>
             </div>
           ))}
         </div>
