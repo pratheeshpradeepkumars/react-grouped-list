@@ -5,7 +5,9 @@ export default class extends Component {
   state = {
     uploadedFiles: [],
     searchValue: "",
-    selectedList: []
+    selectedList: [],
+    editItem: null,
+    error: null
   };
 
   componentDidMount() {
@@ -54,6 +56,32 @@ export default class extends Component {
     this.setState({ uploadedFiles: newList})
   };
 
+  // On Edit onClick
+  handleEdit = (pageId) => {
+   // this.setState({ id })
+  }
+
+  // reset Edit
+  editReset = () => {
+    //this.setState({ id: null });
+  }
+
+  // Version name validation
+   validatePageName = ({ pageId, pageName, checked }) => {
+    let isValid = false;
+    let patt = new RegExp('^[A-Za-z0-9](([_\.\\-\|\: ]?[a-zA-Z0-9]?)*)$');
+    if (patt.test(pageName)) {
+      isValid = true;
+    }
+    if (pageName.length < 2) {
+      isValid = false;
+    }
+    if(!isValid && checked) {
+      this.setState({error: { pageId,  pageName}})
+    }
+    return isValid;
+  };
+
   // On click Inport
   handleImport = () => {
     let { uploadedFiles } = this.state;
@@ -92,10 +120,13 @@ export default class extends Component {
                 return (
                   <PageList
                     key={page.pageId}
+                    fileId={list.id}
                     {...page}
                     onSelect={(e, { pageId }) => {
                       this.handleSelect(e, { pageId, id: list.id });
                     }}
+                    handleEdit={this.handleEdit}
+                    validatePageName={this.validatePageName}
                   />
                 );
               })}

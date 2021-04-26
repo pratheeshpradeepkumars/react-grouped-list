@@ -13,3 +13,10 @@ p {
   font-weight: bold;
   margin-bottom: 5px;
 }
+
+.invalid-text {
+  border: 1px solid red;
+}
+.invalid-text:focus {
+  outline: none;
+}
