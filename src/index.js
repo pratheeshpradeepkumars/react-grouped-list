@@ -33,7 +33,7 @@ const list = [
         name: "Copy_of_IKEA - Design",
         pageId: "88f95b093d094170854751018bd96022",
         versionActiveData: {
-          master: true
+          master1: true
         }
       },
       {

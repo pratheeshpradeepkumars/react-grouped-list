@@ -28,7 +28,7 @@ p {
   display: flex;
   align-items: center;
   border: 1px solid #eee;
-  padding: 10px;
+  padding: 5px;
   border-radius: 4px;
   margin-bottom: 5px;
 }
@@ -40,5 +40,18 @@ p {
 }
 
 .uploaded-info-list .pages-list-container .pages-list .edit-text {
-  width: 100%;
+  flex: 1;
+  height: 20px;
+}
+
+.uploaded-info-list .pages-list-container .pages-list .version-select {
+  width: 40%;
+  margin: 0 10px;
+}
+
+.uploaded-info-list
+  .pages-list-container
+  .pages-list
+  .edit-page-name.is-editing {
+  opacity: 0;
 }

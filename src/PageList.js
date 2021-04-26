@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import Select from "react-select";
 
 const PageList = ({
   fileId,
@@ -22,6 +23,17 @@ const PageList = ({
   const [editItem, setEditItem] = useState(null);
   const [editText, setEditText] = useState(name);
   const [isValidText, setIsValidText] = useState(true);
+  const [selectedOption, setSelectedOption] = useState([]);
+
+  useEffect(() => {
+    if (selectedOption.length === 0) {
+      let master = options.filter(op => op.value === "master");
+      console.log(master);
+      master.length === 0 || !master
+        ? setSelectedOption(options[0])
+        : setSelectedOption(master);
+    }
+  }, [selectedOption]);
 
   const onEdit = id => {
     setEditItem(id);
@@ -63,6 +75,40 @@ const PageList = ({
     }
   };
 
+  // mutiselct handle change
+  const handleMutiSelect = selectedOption => {
+    setSelectedOption(selectedOption);
+  };
+
+  const customStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      background: "#fff",
+      borderColor: "#9e9e9e",
+      minHeight: "25px",
+      height: "325x",
+      boxShadow: state.isFocused ? null : null
+    }),
+
+    valueContainer: (provided, state) => ({
+      ...provided,
+      // height: "25px",
+      padding: "0 6px"
+    }),
+
+    input: (provided, state) => ({
+      ...provided,
+      margin: "0px"
+    }),
+    indicatorSeparator: state => ({
+      display: "none"
+    }),
+    indicatorsContainer: (provided, state) => ({
+      ...provided,
+      height: "25px"
+    })
+  };
+
   return (
     <div className="pages-list">
       <input
@@ -87,9 +133,24 @@ const PageList = ({
           onBlur={e => handleOnBlur(e)}
         />
       )}
-      {editItem !== pageId && (
-        <button onClick={() => onEdit(pageId)}>Edit</button>
-      )}
+
+      <button
+        className={`edit-page-name ${editItem === pageId ? "is-editing" : ""}`}
+        onClick={() => onEdit(pageId)}
+      >
+        Edit
+      </button>
+
+      <div className="version-select">
+        <Select
+          value={selectedOption}
+          onChange={handleMutiSelect}
+          options={options}
+          styles={customStyles}
+          isMulti
+          isClearable={false}
+        />
+      </div>
       <div />
     </div>
   );
