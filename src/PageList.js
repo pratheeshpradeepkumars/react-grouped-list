@@ -69,7 +69,7 @@ const PageList = ({
         type="checkbox"
         id={checkboxId}
         checked={checked}
-        onChange={e => onSelect(e, { pageId })}
+        onChange={e => onSelect(e, { pageId, pageName: editText })}
       />
       {editItem !== pageId ? (
         <label htmlFor={checkboxId}>{name}</label>

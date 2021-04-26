@@ -7,7 +7,8 @@ export default class extends Component {
     searchValue: "",
     selectedList: [],
     editItem: null,
-    error: null
+    error: [],
+    importPagesList: []
   };
 
   componentDidMount() {
@@ -38,7 +39,7 @@ export default class extends Component {
   }
 
   // handle list select
-  handleSelect = (e, { pageId, id }) => {
+  handleSelect = (e, { pageId, id, pageName }) => {
     let checked = e.target.checked,;
     let newList = [...this.state.uploadedFiles].map(files => {
       if(files.id === id) {
@@ -53,7 +54,10 @@ export default class extends Component {
         return files;
       }
     });
-    this.setState({ uploadedFiles: newList})
+    this.setState({ uploadedFiles: newList}, () => {
+      this.validatePageName({pageId, pageName, checked});
+      this.selectedPagesInfo();
+    })
   };
 
   // On Edit save
@@ -70,12 +74,9 @@ export default class extends Component {
       }
       return files;
     });
-    this.setState( { uploadedFiles: processedFiles });
-  }
-
-  // reset Edit
-  editReset = () => {
-    //this.setState({ id: null });
+    this.setState( { uploadedFiles: processedFiles }, () => {
+      this.selectedPagesInfo();
+    });
   }
 
   // Version name validation
@@ -89,13 +90,18 @@ export default class extends Component {
       isValid = false;
     }
     if(!isValid && checked) {
-      this.setState({error: { pageId,  pageName}})
+      this.setState({error: [...this.state.error, pageId]})
+    } else {
+      let filteredValue = [...this.state.error].filter(err => err !== pageId);
+       this.setState({error: filteredValue});
     }
     return isValid;
   };
 
-  // On click Inport
-  handleImport = () => {
+
+  // selected pages deatails
+
+  selectedPagesInfo() {
     let { uploadedFiles } = this.state;
     let filteredUploadFiles = [];
     uploadedFiles.forEach(files => {
@@ -107,13 +113,24 @@ export default class extends Component {
         filteredUploadFiles.push(newFiles);
       }
     });
+    this.setState({importPagesList: filteredUploadFiles});
+  }
 
-    console.log("Import values : ", JSON.stringify(filteredUploadFiles, null, 2));
+  // On click Inport
+  handleImport = () => {
+    let { importPagesList, error }= this.state;
+    if(importPagesList && importPagesList.length > 0 && error.length === 0) {
+      console.log("Import values : ", JSON.stringify(importPagesList, null, 2));
+    }else {
+      alert("Please select valid pages for importing.")
+    }
+    
   }
 
   render() {
-    const { searchValue } = this.state;
+    const { searchValue, importPagesList } = this.state;
     const filteredUploadedFiles = this.filterBySearchValue(searchValue);
+    let isClickable = importPagesList.length > 0;
     return (
       <div className="uploaded-info-container">
         <div className="search-box">
@@ -134,8 +151,8 @@ export default class extends Component {
                     key={page.pageId}
                     fileId={list.id}
                     {...page}
-                    onSelect={(e, { pageId }) => {
-                      this.handleSelect(e, { pageId, id: list.id });
+                    onSelect={(e, { pageId, pageName }) => {
+                      this.handleSelect(e, { pageId, id: list.id, pageName });
                     }}
                     handleEdit={this.handleEdit}
                     validatePageName={this.validatePageName}
@@ -145,7 +162,7 @@ export default class extends Component {
             </div>
           ))}
         </div>
-        <button onClick={this.handleImport}>Import</button>
+        <button disabled={!isClickable} onClick={this.handleImport}>Import</button>
       </div>
     );
   }
