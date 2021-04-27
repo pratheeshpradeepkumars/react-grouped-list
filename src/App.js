@@ -119,10 +119,26 @@ export default class extends Component {
 
   // On click Inport
   handleImport = () => {
-    let { importPagesList, error }= this.state;
+    let { importPagesList, error, selectedOptions }= this.state;
     if(importPagesList && importPagesList.length > 0 && error.length === 0) {
       //console.log("Import values : ", JSON.stringify(importPagesList, null, 2));
-       console.log(this.state.selectedOptions);
+      let importPages = importPagesList.map(list => {
+        let newList =  list.pages.map(({pageId, name}) => {
+          let versionActiveData = {};
+          let versionData = selectedOptions[`${list.id}-${pageId}`];
+          versionData.forEach(item => versionActiveData[item.value] = item.active);
+          return {
+            pageId,
+            name,
+            versionActiveData
+          }
+        })
+        return {
+          ...list,
+          pages: newList
+        }
+      });
+       console.log(importPages);
     }else {
       alert("Please select valid pages for importing.")
     }

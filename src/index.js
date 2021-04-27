@@ -12,8 +12,8 @@ const list = [
         name: "jsw_01",
         pageId: "685bf9ff901c4be4a37a5a33d31e007b",
         versionActiveData: {
-          "version 1": true,
-          master: false
+          "version 1": false,
+          master: true
         }
       }
     ]
