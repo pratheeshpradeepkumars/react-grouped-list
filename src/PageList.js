@@ -123,7 +123,6 @@ const PageList = ({
         <label htmlFor={checkboxId}>{name}</label>
       ) : (
         <input
-          placeholder={isValidText}
           className={`edit-text ${isValidText ? "" : "invalid-text"}`}
           type="text"
           value={editText}
