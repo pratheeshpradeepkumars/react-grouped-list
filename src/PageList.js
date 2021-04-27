@@ -19,7 +19,7 @@ const PageList = ({
       active: versionActiveData[version]
     });
   }
-  let checkboxId = `${pageId}-${name.replace(/\s/g, "")}`;
+  let checkboxId = `${fileId}-${pageId}-${name.replace(/\s/g, "")}`;
   const [editItem, setEditItem] = useState(null);
   const [editText, setEditText] = useState(name);
   const [isValidText, setIsValidText] = useState(true);
