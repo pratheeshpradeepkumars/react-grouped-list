@@ -9,7 +9,8 @@ const PageList = ({
   checked = false,
   onSelect,
   validatePageName,
-  handleEdit
+  handleEdit,
+  getSelectedOptions
 }) => {
   let options = [];
   for (let version in versionActiveData) {
@@ -28,10 +29,9 @@ const PageList = ({
   useEffect(() => {
     if (selectedOption.length === 0) {
       let master = options.filter(op => op.value === "master");
-      console.log(master);
-      master.length === 0 || !master
-        ? setSelectedOption(options[0])
-        : setSelectedOption(master);
+      let list = master.length === 0 || !master ? [options[0]] : master;
+      setSelectedOption(list);
+      getSelectedOptions(`${fileId}-${pageId}`, list);
     }
   }, [selectedOption]);
 
@@ -78,6 +78,7 @@ const PageList = ({
   // mutiselct handle change
   const handleMutiSelect = selectedOption => {
     setSelectedOption(selectedOption);
+    getSelectedOptions(`${fileId}-${pageId}`, selectedOption);
   };
 
   const customStyles = {

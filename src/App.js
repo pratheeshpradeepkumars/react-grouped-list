@@ -8,7 +8,8 @@ export default class extends Component {
     selectedList: [],
     editItem: null,
     error: [],
-    importPagesList: []
+    importPagesList: [],
+    selectedOptions: {}
   };
 
   componentDidMount() {
@@ -120,11 +121,18 @@ export default class extends Component {
   handleImport = () => {
     let { importPagesList, error }= this.state;
     if(importPagesList && importPagesList.length > 0 && error.length === 0) {
-      console.log("Import values : ", JSON.stringify(importPagesList, null, 2));
+      //console.log("Import values : ", JSON.stringify(importPagesList, null, 2));
+       console.log(this.state.selectedOptions);
     }else {
       alert("Please select valid pages for importing.")
     }
     
+  }
+
+  getSelectedOptions = (id, options) => {
+    let { selectedOptions } = this.state;
+    selectedOptions[id] = options;
+    this.setState({ selectedOptions: selectedOptions});
   }
 
   render() {
@@ -149,7 +157,7 @@ export default class extends Component {
               {list.pages.map(page => {
                 return (
                   <PageList
-                    key={page.pageId}
+                    key={`${list.id}-${page.pageId}`}
                     fileId={list.id}
                     {...page}
                     onSelect={(e, { pageId, pageName }) => {
@@ -157,6 +165,7 @@ export default class extends Component {
                     }}
                     handleEdit={this.handleEdit}
                     validatePageName={this.validatePageName}
+                    getSelectedOptions={this.getSelectedOptions}
                   />
                 );
               })}</div>
