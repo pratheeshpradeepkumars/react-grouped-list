@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import PageList from "./PageList";
-
+let counter = 0;
 export default class FilePageGroup extends Component {
   state = {
     uploadedFiles: [],
@@ -139,11 +139,55 @@ export default class FilePageGroup extends Component {
         }
       });
        console.log(importPages);
+       this.iterateImportList(importPages);
     }else {
       alert("Please select valid pages for importing.")
     }
     
   }
+
+  iterateImportList = (groupsArray) => {
+    
+const results = [];
+
+groupsArray.reduce((prevPromise, group) => {
+            return prevPromise.then(() => {
+                return this.apiRequest(group)
+                    .then(result => {
+                        // Process a single result if necessary.
+                        results.push({fileId: group.id, pages: group.pages}); // Collect your results.
+                    }).catch(err =>{
+                    
+                    })
+            });
+        },
+        Promise.resolve() // Seed promise.
+    )
+    .then((response) => {
+        // Code that depends on all results.
+           console.log("RES : ", JSON.stringify(results));
+    })
+    .catch(err => {
+       console.log("Error : ", err);
+    });
+  }
+
+  apiRequest = payload => {
+    console.log(payload);
+    let url = "https://jsonplaceholder.typicode.com/todos/1";
+    if(counter % 2 === 0) {
+      url = "https://jsonplaceholder.typicode.com/todos/1";
+    }
+    counter ++;
+    return new Promise(function(resolve, reject) {
+      fetch(url)
+        .then(response => response.json())
+        .then(json => resolve(json))
+        .catch(error => {
+          reject(payload.id);
+        });
+    });
+  };
 
   getSelectedOptions = (id, options) => {
     let { selectedOptions } = this.state;
