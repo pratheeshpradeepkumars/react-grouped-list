@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import PageList from "./PageList";
 
-export default class extends Component {
+export default class FilePageGroup extends Component {
   state = {
     uploadedFiles: [],
     searchValue: "",
