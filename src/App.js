@@ -122,11 +122,12 @@ export default class FilePageGroup extends Component {
   handleImport = () => {
     let { importPagesList, error, selectedOptions, importing }= this.state;
     let queuedItems = {...importing};
+   
     if(importPagesList && importPagesList.length > 0 && error.length === 0) {
       //console.log("Import values : ", JSON.stringify(importPagesList, null, 2));
       let importPages = importPagesList.map(list => {
-          queuedItems = { [list.id]: "queued" };
           let newList =  list.pages.map(({pageId, name}) => {
+          queuedItems = { [`${list.id}:${pageId}`]: "queued" };
           let versionActiveData = {};
           let versionData = selectedOptions[`${list.id}-${pageId}`];
           versionData.forEach(item => versionActiveData[item.value] = item.active);
@@ -141,7 +142,7 @@ export default class FilePageGroup extends Component {
           pages: newList
         }
       });
-       this.setState({importing: queuedItems});
+       this.setState({importing: {...this.state.importing, ...queuedItems}});
        this.iterateImportList(importPages);
     }else {
       alert("Please select valid pages for importing.")
@@ -156,11 +157,21 @@ const results = [];
 groupsArray.reduce((prevPromise, group) => {
            
             return prevPromise.then(() => {
-                return this.apiRequest(group)
+             
+              let importingList = {};
+               group.pages.forEach(page => {
+                           importingList[`${group.id}:${page.pageId}`] = "importing";
+                         })
+                          let queuedItems = {...this.state.importing, ...importingList};
+                return this.apiRequest(group,queuedItems)
                     .then(result => {
                         // Process a single result if necessary.
                         results.push({fileId: group.id, pages: group.pages}); // Collect your results.
-                         let importedItems = {...this.state.importing, [group.id]: "done"};
+                         let doneList = {};
+                         group.pages.forEach(page => {
+                           doneList[`${group.id}:${page.pageId}`] = "done";
+                         })
+                         let importedItems = {...this.state.importing, ...doneList};
                         
                           this.setState({importing: importedItems})
                     }).catch(err =>{
@@ -179,15 +190,10 @@ groupsArray.reduce((prevPromise, group) => {
     });
   }
 
-  apiRequest = payload => {
-    console.log(payload);
-     let queuedItems = {...this.state.importing, [payload.id]: "importing"};
-      this.setState({importing: queuedItems})
+  apiRequest = (payload, queuedItems) => {
+    
+    this.setState({importing: queuedItems});
     let url = "https://jsonplaceholder.typicode.com/todos/1";
-    if(counter % 2 === 0) {
-      url = "https://jsonplaceholder.typicode.com/todos/1";
-    }
-    counter ++;
     return new Promise(function(resolve, reject) {
       fetch(url)
         .then(response => response.json())
@@ -221,12 +227,22 @@ groupsArray.reduce((prevPromise, group) => {
           />
         </div>
         <div className="uploaded-info-list">
-          {filteredUploadedFiles.map(list => (
+          {filteredUploadedFiles.map(list => {
+            let imp = null;
+            if(importing && Object.keys(importing).length > 0) {
+             let keys = Object.keys(importing)
+             .filter(item => item.split(":")[0] === list.id)
+             if(keys.length > 0) {
+               imp = keys[0].split(":")[0]
+             }
+            }
+            console.log(imp, ": ", "")
+            return(
             <div className="header" key={list.id}>
               <div className="file-name">
                 <span>{list.fileName}</span>
-                  {importing[list.id] === "queued" && <span>Queued</span>}
-                  {importing[list.id] === "importing" && <span>Importing</span>}
+                  {imp && importing[imp] === "queued" && <span>Queued</span>}
+                  {imp && importing[imp] === "importing" && <span>Importing</span>}
               </div>
               <div className="pages-list-container">
               {list.pages.map(page => {
@@ -246,7 +262,7 @@ groupsArray.reduce((prevPromise, group) => {
                 );
               })}</div>
             </div>
-          ))}
+          )})}
         </div>
         <button disabled={!isClickable} onClick={this.handleImport}>Import</button>
       </div>
