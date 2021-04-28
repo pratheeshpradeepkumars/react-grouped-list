@@ -9,7 +9,8 @@ export default class FilePageGroup extends Component {
     editItem: null,
     error: [],
     importPagesList: [],
-    selectedOptions: {}
+    selectedOptions: {},
+    importing: {}
   };
 
   componentDidMount() {
@@ -119,11 +120,13 @@ export default class FilePageGroup extends Component {
 
   // On click Inport
   handleImport = () => {
-    let { importPagesList, error, selectedOptions }= this.state;
+    let { importPagesList, error, selectedOptions, importing }= this.state;
+    let queuedItems = {...importing};
     if(importPagesList && importPagesList.length > 0 && error.length === 0) {
       //console.log("Import values : ", JSON.stringify(importPagesList, null, 2));
       let importPages = importPagesList.map(list => {
-        let newList =  list.pages.map(({pageId, name}) => {
+          queuedItems = { [list.id]: "queued" };
+          let newList =  list.pages.map(({pageId, name}) => {
           let versionActiveData = {};
           let versionData = selectedOptions[`${list.id}-${pageId}`];
           versionData.forEach(item => versionActiveData[item.value] = item.active);
@@ -138,7 +141,7 @@ export default class FilePageGroup extends Component {
           pages: newList
         }
       });
-       console.log(importPages);
+       this.setState({importing: queuedItems});
        this.iterateImportList(importPages);
     }else {
       alert("Please select valid pages for importing.")
@@ -151,11 +154,15 @@ export default class FilePageGroup extends Component {
 const results = [];
 
 groupsArray.reduce((prevPromise, group) => {
+           
             return prevPromise.then(() => {
                 return this.apiRequest(group)
                     .then(result => {
                         // Process a single result if necessary.
                         results.push({fileId: group.id, pages: group.pages}); // Collect your results.
+                         let importedItems = {...this.state.importing, [group.id]: "done"};
+                        
+                          this.setState({importing: importedItems})
                     }).catch(err =>{
                     
                     })
@@ -163,7 +170,7 @@ groupsArray.reduce((prevPromise, group) => {
         },
         Promise.resolve() // Seed promise.
     )
-    .then((response) => {
+    .then(() => {
         // Code that depends on all results.
            console.log("RES : ", JSON.stringify(results));
     })
@@ -174,6 +181,8 @@ groupsArray.reduce((prevPromise, group) => {
 
   apiRequest = payload => {
     console.log(payload);
+     let queuedItems = {...this.state.importing, [payload.id]: "importing"};
+      this.setState({importing: queuedItems})
     let url = "https://jsonplaceholder.typicode.com/todos/1";
     if(counter % 2 === 0) {
       url = "https://jsonplaceholder.typicode.com/todos/1";
@@ -182,7 +191,9 @@ groupsArray.reduce((prevPromise, group) => {
     return new Promise(function(resolve, reject) {
       fetch(url)
         .then(response => response.json())
-        .then(json => resolve(json))
+        .then(json => {
+          resolve(json);
+        })
         .catch(error => {
           reject(payload.id);
         });
@@ -196,7 +207,7 @@ groupsArray.reduce((prevPromise, group) => {
   }
 
   render() {
-    const { searchValue, importPagesList } = this.state;
+    const { searchValue, importPagesList, importing } = this.state;
     const filteredUploadedFiles = this.filterBySearchValue(searchValue);
     let isClickable = importPagesList.length > 0;
     return (
@@ -212,7 +223,11 @@ groupsArray.reduce((prevPromise, group) => {
         <div className="uploaded-info-list">
           {filteredUploadedFiles.map(list => (
             <div className="header" key={list.id}>
-              <div className="file-name">{list.fileName}</div>
+              <div className="file-name">
+                <span>{list.fileName}</span>
+                  {importing[list.id] === "queued" && <span>Queued</span>}
+                  {importing[list.id] === "importing" && <span>Importing</span>}
+              </div>
               <div className="pages-list-container">
               {list.pages.map(page => {
                 return (
@@ -226,6 +241,7 @@ groupsArray.reduce((prevPromise, group) => {
                     handleEdit={this.handleEdit}
                     validatePageName={this.validatePageName}
                     getSelectedOptions={this.getSelectedOptions}
+                    status={importing}
                   />
                 );
               })}</div>

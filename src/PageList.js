@@ -10,7 +10,8 @@ const PageList = ({
   onSelect,
   validatePageName,
   handleEdit,
-  getSelectedOptions
+  getSelectedOptions,
+  status
 }) => {
   let options = [];
   for (let version in versionActiveData) {
@@ -151,6 +152,7 @@ const PageList = ({
           isClearable={false}
         />
       </div>
+      {status[fileId] === "done" && <div>Imported</div>}
       <div />
     </div>
   );
