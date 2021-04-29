@@ -4,7 +4,7 @@ const DONE = "done";
 const FAILED = "failed";
 const IMPORTING = "importing";
 const QUEUED = "queued";
-let counter = 0;
+
 export default class FilePageGroup extends Component {
   state = {
     uploadedFiles: [],
@@ -205,10 +205,6 @@ groupsArray.reduce((prevPromise, group) => {
 
   apiRequest = (payload) => {
     let url = "https://jsonplaceholder.typicode.com/todos/1";
-    if(counter %2 === 0){
-       url = "https://jsonplaceholder1s.typicode.com/todos/1";
-    }
-    counter ++;
     return new Promise(function(resolve, reject) {
       fetch(url)
         .then(response => response.json())
