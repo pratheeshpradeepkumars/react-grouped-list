@@ -1,5 +1,9 @@
 import React, { Component } from "react";
 import PageList from "./PageList";
+const DONE = "done";
+const FAILED = "failed";
+const IMPORTING = "importing";
+const QUEUED = "queued";
 let counter = 0;
 export default class FilePageGroup extends Component {
   state = {
@@ -124,10 +128,9 @@ export default class FilePageGroup extends Component {
     let queuedItems = {...importing};
    
     if(importPagesList && importPagesList.length > 0 && error.length === 0) {
-      //console.log("Import values : ", JSON.stringify(importPagesList, null, 2));
       let importPages = importPagesList.map(list => {
           let newList =  list.pages.map(({pageId, name}) => {
-          queuedItems = { [`${list.id}:${pageId}`]: "queued" };
+          queuedItems = { [`${list.id}:${pageId}`]: QUEUED };
           let versionActiveData = {};
           let versionData = selectedOptions[`${list.id}-${pageId}`];
           versionData.forEach(item => versionActiveData[item.value] = item.active);
@@ -160,22 +163,31 @@ groupsArray.reduce((prevPromise, group) => {
              
               let importingList = {};
                group.pages.forEach(page => {
-                           importingList[`${group.id}:${page.pageId}`] = "importing";
+                           importingList[group.id] = IMPORTING;
                          })
                           let queuedItems = {...this.state.importing, ...importingList};
+                          this.setState({importing: queuedItems});
                 return this.apiRequest(group,queuedItems)
                     .then(result => {
                         // Process a single result if necessary.
                         results.push({fileId: group.id, pages: group.pages}); // Collect your results.
                          let doneList = {};
                          group.pages.forEach(page => {
-                           doneList[`${group.id}:${page.pageId}`] = "done";
+                           doneList[`${group.id}:${page.pageId}`] = DONE;
+                           doneList[`${group.id}`] = DONE;
                          })
                          let importedItems = {...this.state.importing, ...doneList};
                         
                           this.setState({importing: importedItems})
                     }).catch(err =>{
-                    
+                     let failedList = {};
+                         group.pages.forEach(page => {
+                           failedList[`${group.id}:${page.pageId}`] = FAILED;
+                           failedList[`${group.id}`] = FAILED;
+                         })
+                         let failedItems = {...this.state.importing, ...failedList};
+                        
+                          this.setState({importing: failedItems})
                     })
             });
         },
@@ -184,16 +196,19 @@ groupsArray.reduce((prevPromise, group) => {
     .then(() => {
         // Code that depends on all results.
            console.log("RES : ", JSON.stringify(results));
+          this.processImportedList();
     })
     .catch(err => {
        console.log("Error : ", err);
     });
   }
 
-  apiRequest = (payload, queuedItems) => {
-    
-    this.setState({importing: queuedItems});
+  apiRequest = (payload) => {
     let url = "https://jsonplaceholder.typicode.com/todos/1";
+    if(counter %2 === 0){
+       url = "https://jsonplaceholder1s.typicode.com/todos/1";
+    }
+    counter ++;
     return new Promise(function(resolve, reject) {
       fetch(url)
         .then(response => response.json())
@@ -212,6 +227,27 @@ groupsArray.reduce((prevPromise, group) => {
     this.setState({ selectedOptions: selectedOptions});
   }
 
+  // make imported values checked false
+  processImportedList = () => {
+    const { importing, uploadedFiles } = this.state;
+     let newList = [...uploadedFiles].map(files => {
+      if(importing[files.id] === DONE) {
+         files.pages.map(page => {
+          if(importing[`${files.id}:${page.pageId}`] ===  DONE) {
+            page.checked = false
+          }
+          return page;
+        })
+        return files
+      }else {
+        return files;
+      }
+    });
+    this.setState({ uploadedFiles: newList}, () => {
+      this.selectedPagesInfo();
+    })
+  } 
+
   render() {
     const { searchValue, importPagesList, importing } = this.state;
     const filteredUploadedFiles = this.filterBySearchValue(searchValue);
@@ -228,21 +264,14 @@ groupsArray.reduce((prevPromise, group) => {
         </div>
         <div className="uploaded-info-list">
           {filteredUploadedFiles.map(list => {
-            let imp = null;
-            if(importing && Object.keys(importing).length > 0) {
-             let keys = Object.keys(importing)
-             .filter(item => item.split(":")[0] === list.id)
-             if(keys.length > 0) {
-               imp = keys[0].split(":")[0]
-             }
-            }
-            console.log(imp, ": ", "")
+
+          
             return(
             <div className="header" key={list.id}>
               <div className="file-name">
                 <span>{list.fileName}</span>
-                  {imp && importing[imp] === "queued" && <span>Queued</span>}
-                  {imp && importing[imp] === "importing" && <span>Importing</span>}
+                  {importing[list.id] === "queued" && <span>Queued</span>}
+                  {importing[list.id] === "importing" && <span>Importing</span>}
               </div>
               <div className="pages-list-container">
               {list.pages.map(page => {

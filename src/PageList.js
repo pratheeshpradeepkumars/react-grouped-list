@@ -111,15 +111,21 @@ const PageList = ({
     })
   };
 
+  let imported = status[`${fileId}:${pageId}`] === "done";
+  let failed = status[`${fileId}:${pageId}`] === "failed";
+
   return (
     <div className="pages-list">
-      <input
-        type="checkbox"
-        className="selection-box"
-        id={checkboxId}
-        checked={checked}
-        onChange={e => onSelect(e, { pageId, pageName: editText })}
-      />
+      {!imported && (
+        <input
+          type="checkbox"
+          className="selection-box"
+          id={checkboxId}
+          checked={checked}
+          onChange={e => onSelect(e, { pageId, pageName: editText })}
+        />
+      )}
+
       {editItem !== pageId ? (
         <label htmlFor={checkboxId}>{name}</label>
       ) : (
@@ -134,14 +140,18 @@ const PageList = ({
           onBlur={e => handleOnBlur(e)}
         />
       )}
-
-      <button
-        className={`edit-page-name ${editItem === pageId ? "is-editing" : ""}`}
-        onClick={() => onEdit(pageId)}
-      >
-        Edit
-      </button>
-
+      {!imported && (
+        <button
+          className={`edit-page-name ${
+            editItem === pageId ? "is-editing" : ""
+          }`}
+          onClick={() => onEdit(pageId)}
+        >
+          Edit
+        </button>
+      )}
+      {imported && <div>Imported</div>}
+      {failed && <div>Failed</div>}
       <div className="version-select">
         <Select
           value={selectedOption}
@@ -150,9 +160,10 @@ const PageList = ({
           styles={customStyles}
           isMulti
           isClearable={false}
+          isDisabled={imported}
         />
       </div>
-      {status[fileId] === "done" && <div>Imported</div>}
+
       <div />
     </div>
   );
