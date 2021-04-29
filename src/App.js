@@ -130,7 +130,7 @@ export default class FilePageGroup extends Component {
     if(importPagesList && importPagesList.length > 0 && error.length === 0) {
       let importPages = importPagesList.map(list => {
           let newList =  list.pages.map(({pageId, name}) => {
-          queuedItems = { [`${list.id}:${pageId}`]: QUEUED };
+          queuedItems = { [list.id]: QUEUED };
           let versionActiveData = {};
           let versionData = selectedOptions[`${list.id}-${pageId}`];
           versionData.forEach(item => versionActiveData[item.value] = item.active);
@@ -266,8 +266,8 @@ groupsArray.reduce((prevPromise, group) => {
             <div className="header" key={list.id}>
               <div className="file-name">
                 <span>{list.fileName}</span>
-                  {importing[list.id] === "queued" && <span>Queued</span>}
-                  {importing[list.id] === "importing" && <span>Importing</span>}
+                  {importing[list.id] === QUEUED && <span>Queued</span>}
+                  {importing[list.id] === IMPORTING && <span>Importing</span>}
               </div>
               <div className="pages-list-container">
               {list.pages.map(page => {
